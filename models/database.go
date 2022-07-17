@@ -1,8 +1,7 @@
-package db
+package models
 
 import (
 	"fmt"
-	"go-authapi-adv/models"
 	"log"
 	"os"
 
@@ -11,11 +10,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type DatabaseConnection struct {
-	DB *gorm.DB
-}
+var DB *gorm.DB
 
-func (d *DatabaseConnection) ConnectDataBase() {
+func ConnectDataBase() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("loading .env failed")
@@ -30,7 +27,7 @@ func (d *DatabaseConnection) ConnectDataBase() {
 
 	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", DbUser, DbPassword, DbHost, DbPort, DbName)
 
-	d.DB, err = gorm.Open(Dbdriver, DBURL)
+	DB, err = gorm.Open(Dbdriver, DBURL)
 
 	if err != nil {
 		fmt.Println("Cannot connect to database ", Dbdriver)
@@ -39,15 +36,6 @@ func (d *DatabaseConnection) ConnectDataBase() {
 		fmt.Println("connected to database ", Dbdriver)
 	}
 
-	d.DB.AutoMigrate(&models.RegisterInput{})
+	DB.AutoMigrate(&User{})
 
-}
-func (d *DatabaseConnection) SaveUser(user models.User) (*models.User, error) {
-	var err error
-
-	err = d.DB.Create(&user).Error
-	if err != nil {
-		return &models.User{}, err
-	}
-	return &user, nil
 }

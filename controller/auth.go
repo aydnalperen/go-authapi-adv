@@ -2,7 +2,9 @@ package controller
 
 import (
 	"go-authapi-adv/models"
+	"html"
 	"net/http"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -30,11 +32,9 @@ func Register(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 	}
-
 	user.Password = string(hashedPassword) // user creation is done
-
-	// db.DatabaseConnection.SaveUser()
-
+	user.Username = html.EscapeString(strings.TrimSpace(user.Username))
+	user.SaveUser()
 	ctx.JSON(http.StatusOK, gin.H{"message": "validated!"})
 }
 

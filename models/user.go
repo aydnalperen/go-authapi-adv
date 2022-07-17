@@ -1,6 +1,11 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"go-authapi-adv/utils"
+
+	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
+)
 
 type User struct {
 	gorm.Model
@@ -9,4 +14,41 @@ type User struct {
 	Lastname string `gorm:"size:255;not null;unique" json:"lastname"`
 	Username string `gorm:"size:255;not null;unique" json:"username"`
 	Password string `gorm:"size:255;not null;unique" json:"password"`
+}
+
+func VerifyPassword(password, hashedPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+func (u *User) SaveUser() (*User, error) {
+	var err error
+
+	err = DB.Create(&u).Error
+	if err != nil {
+		return &User{}, err
+	}
+	return u, nil
+}
+
+func LoginCheck(username string, password string) (string, error) {
+	var err error
+
+	user := User{}
+
+	err = DB.Model(User{}).Where("username=?", username).Take(&user).Error
+
+	if err != nil {
+		return "", err
+	}
+	err = VerifyPassword(password, user.Password)
+
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return "", err
+	}
+	token, err := utils.GenerateToken(user.ID)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
