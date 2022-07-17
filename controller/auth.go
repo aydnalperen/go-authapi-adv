@@ -4,6 +4,8 @@ import (
 	"go-authapi-adv/models"
 	"net/http"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,6 +16,24 @@ func Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	user := models.User{}
+
+	user.Email = input.Mail
+	user.Name = input.Name
+	user.Lastname = input.Lastname
+	//user.Password = input.Password
+	user.Username = input.Username
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	user.Password = string(hashedPassword) // user creation is done
+
+	// db.DatabaseConnection.SaveUser()
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "validated!"})
 }
