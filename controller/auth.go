@@ -19,7 +19,7 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
-	user := models.User{}
+	var user models.User
 
 	user.Email = input.Mail
 	user.Name = input.Name
@@ -34,7 +34,12 @@ func Register(ctx *gin.Context) {
 	}
 	user.Password = string(hashedPassword) // user creation is done
 	user.Username = html.EscapeString(strings.TrimSpace(user.Username))
-	user.SaveUser()
+
+	_, err = user.SaveUser()
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "validated!"})
 }
 

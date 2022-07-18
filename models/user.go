@@ -20,11 +20,9 @@ func VerifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 func (u *User) SaveUser() (*User, error) {
-	var err error
 
-	err = DB.Create(&u).Error
-	if err != nil {
-		return &User{}, err
+	if result := DB.Create(&u); result.Error != nil {
+		return &User{}, result.Error
 	}
 	return u, nil
 }
