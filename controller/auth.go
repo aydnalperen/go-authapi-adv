@@ -44,7 +44,17 @@ func Register(ctx *gin.Context) {
 }
 
 func Login(ctx *gin.Context) {
+	var input models.LoginInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+	}
+	token, err := models.LoginCheck(input.UserName, input.Password)
 
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+	}
+
+	println(token)
 }
 
 func Logout(ctx *gin.Context) {
