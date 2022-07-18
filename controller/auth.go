@@ -2,6 +2,7 @@ package controller
 
 import (
 	"go-authapi-adv/models"
+	"go-authapi-adv/utils"
 	"html"
 	"net/http"
 	"strings"
@@ -59,4 +60,19 @@ func Login(ctx *gin.Context) {
 
 func Logout(ctx *gin.Context) {
 
+}
+func CurrentUser(ctx *gin.Context) {
+	user_id, err := utils.ExtractTokenID(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	user, err := models.GetUserById(user_id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "success", "data": user})
 }

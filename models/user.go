@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"go-authapi-adv/utils"
 
 	"github.com/jinzhu/gorm"
@@ -48,4 +49,15 @@ func LoginCheck(username string, password string) (string, error) {
 	}
 
 	return token, nil
+}
+func GetUserById(id uint) (User, error) {
+	var user User
+
+	if err := DB.First(&user, id).Error; err != nil {
+		return user, errors.New("User not found!")
+	}
+
+	user.Password = ""
+
+	return user, nil
 }
