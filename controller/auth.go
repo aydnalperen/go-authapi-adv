@@ -46,15 +46,15 @@ func Register(ctx *gin.Context) {
 func Login(ctx *gin.Context) {
 	var input models.LoginInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
 	}
 	token, err := models.LoginCheck(input.UserName, input.Password)
 
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
 	}
 
-	println(token)
+	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }
 
 func Logout(ctx *gin.Context) {
